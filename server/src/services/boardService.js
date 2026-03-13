@@ -81,6 +81,14 @@ class BoardService {
     board.columnOrder.push(column._id);
     await board.save();
 
+    const Activity = (await import("../models/Activity.js")).default;
+    await Activity.create({
+      boardId,
+      actorId: userId,
+      action: "column:created",
+      payload: { columnId: column._id, title },
+    });
+
     return column;
   }
 
@@ -100,6 +108,14 @@ class BoardService {
     );
 
     if (!column) throw { status: 404, code: "NOT_FOUND", message: "Column not found" };
+
+    const Activity = (await import("../models/Activity.js")).default;
+    await Activity.create({
+      boardId,
+      actorId: userId,
+      action: "column:updated",
+      payload: { columnId, title, oldTitle: column.title },
+    });
 
     return column;
   }
@@ -125,6 +141,14 @@ class BoardService {
     });
 
     await Column.findByIdAndDelete(columnId);
+
+    const Activity = (await import("../models/Activity.js")).default;
+    await Activity.create({
+      boardId,
+      actorId: userId,
+      action: "column:deleted",
+      payload: { columnId, title: column.title },
+    });
 
     return { message: "Column and associated cards deleted" };
   }

@@ -109,6 +109,7 @@ const useBoardSockets = (activeBoardId, setBoardData) => {
   }, [emitEvent]);
 
   return {
+    socket,
     presence,
     handleMoveCard,
     handleTyping

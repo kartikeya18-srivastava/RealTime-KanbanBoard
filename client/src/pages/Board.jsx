@@ -7,6 +7,8 @@ import BoardModal from '../components/modals/BoardModal';
 import ColumnModal from '../components/modals/ColumnModal';
 import CardModal from '../components/modals/CardModal';
 import CardDetailModal from '../components/modals/CardDetailModal';
+import InviteModal from '../components/modals/InviteModal';
+import ActivityLog from '../components/ActivityLog';
 import useBoardData from '../hooks/useBoardData';
 import useBoardSockets from '../hooks/useBoardSockets';
 import api from '../api/client';
@@ -25,7 +27,7 @@ const Board = () => {
     deleteWorkspace
   } = useBoardData();
 
-  const { presence, handleMoveCard } = useBoardSockets(activeBoard?._id, setBoardData);
+  const { presence, handleMoveCard, socket } = useBoardSockets(activeBoard?._id, setBoardData);
 
   // Modal Visibility States
   const [modals, setModals] = useState({
@@ -33,11 +35,15 @@ const Board = () => {
     board: false,
     column: false,
     card: false,
-    detail: false
+    detail: false,
+    invite: false,
+    activity: false
   });
 
   const [targetColumnId, setTargetColumnId] = useState(null);
   const [activeCardDetail, setActiveCardDetail] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [lastMove, setLastMove] = useState(null);
 
   const handleDeleteColumn = async (columnId) => {
     if (!activeBoard || !window.confirm('Delete this column? All cards in it will be lost if not moved first.')) return;
@@ -54,6 +60,43 @@ const Board = () => {
     if (extra.columnId) setTargetColumnId(extra.columnId);
     if (extra.card) setActiveCardDetail(extra.card);
   };
+
+  const handleUndo = async () => {
+    if (!lastMove) return;
+    const { cardId, fromColumnId, toColumnId, oldPosition, version } = lastMove;
+    try {
+      if (socket) {
+        socket.emit('card:move', {
+          cardId,
+          fromColumnId: toColumnId,
+          toColumnId: fromColumnId,
+          newPosition: oldPosition,
+          clientVersion: version
+        });
+        setLastMove(null);
+        toast.success('Action undone');
+      }
+    } catch (err) {
+      toast.error('Undo failed');
+    }
+  };
+
+  const onMoveCardProxy = (data) => {
+    // data: { cardId, fromColumnId, toColumnId, newPosition, oldPosition, version }
+    setLastMove(data);
+    handleMoveCard(data);
+  };
+
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault();
+        handleUndo();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [lastMove]);
 
   if (isLoading) {
     return (
@@ -75,6 +118,7 @@ const Board = () => {
         onAddBoard={() => toggleModal('board', true)}
         onAddWorkspace={() => toggleModal('workspace', true)}
         onDeleteWorkspace={deleteWorkspace}
+        onInvite={(ws) => { setActiveWorkspace(ws); toggleModal('invite', true); }}
       />
       
       <main className="flex-1 flex flex-col min-w-0">
@@ -83,6 +127,9 @@ const Board = () => {
           activeWorkspace={activeWorkspace}
           presence={presence}
           onDeleteBoard={deleteBoard}
+          onToggleActivity={() => toggleModal('activity', true)}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
         />
 
         <div className="flex-1 overflow-x-auto p-8">
@@ -90,9 +137,12 @@ const Board = () => {
             <BoardContent 
               board={boardData.board}
               columns={boardData.columns}
-              cards={boardData.cards}
+              cards={boardData.cards.filter(c => 
+                c.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                c.labels.some(l => l.toLowerCase().includes(searchQuery.toLowerCase()))
+              )}
               presence={presence}
-              onMoveCard={handleMoveCard}
+              onMoveCard={onMoveCardProxy}
               onMoveColumn={(id, index) => toast('Column move feature coming soon')}
               onAddCard={(columnId) => toggleModal('card', true, { columnId })}
               onAddColumn={() => toggleModal('column', true)}
@@ -146,6 +196,18 @@ const Board = () => {
         isOpen={modals.detail}
         onClose={() => toggleModal('detail', false)}
         card={activeCardDetail}
+      />
+
+      <InviteModal 
+        isOpen={modals.invite}
+        onClose={() => toggleModal('invite', false)}
+        workspaceId={activeWorkspace?._id}
+      />
+
+      <ActivityLog 
+        isOpen={modals.activity}
+        onClose={() => toggleModal('activity', false)}
+        boardId={activeBoard?._id}
       />
     </div>
   );

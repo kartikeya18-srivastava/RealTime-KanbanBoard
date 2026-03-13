@@ -44,7 +44,7 @@ class WorkspaceService {
     return workspace;
   }
 
-  async inviteMember(workspaceId, email, role) {
+  async inviteMember(workspaceId, inviterId, email, role) {
     const invitee = await User.findOne({ email });
     if (!invitee) {
       throw { status: 404, code: "NOT_FOUND", message: "User not found" };
@@ -53,6 +53,14 @@ class WorkspaceService {
     const workspace = await Workspace.findById(workspaceId);
     if (!workspace) {
       throw { status: 404, code: "NOT_FOUND", message: "Workspace not found" };
+    }
+
+    // Check if inviter is an owner
+    const inviter = workspace.members.find(
+      (m) => m.userId.toString() === inviterId.toString()
+    );
+    if (!inviter || inviter.role !== "owner") {
+      throw { status: 403, code: "FORBIDDEN", message: "Only owners can invite members" };
     }
 
     const alreadyMember = workspace.members.find(
@@ -68,6 +76,22 @@ class WorkspaceService {
     await User.findByIdAndUpdate(invitee._id, {
       $push: { workspaces: workspace._id },
     });
+
+    const Activity = (await import("../models/Activity.js")).default;
+    // We record this activity on all boards in the workspace? 
+    // Usually activity is board-specific in this model. 
+    // If the requirement says Board Activity Log, maybe we skip or record to all boards.
+    // Let's check what boards exist in this workspace.
+    const Board = (await import("../models/Board.js")).default;
+    const boards = await Board.find({ workspaceId });
+    for (const board of boards) {
+      await Activity.create({
+        boardId: board._id,
+        actorId: inviterId,
+        action: "member:invited",
+        payload: { email, role, inviteeId: invitee._id },
+      });
+    }
 
     return { workspace, invitee };
   }

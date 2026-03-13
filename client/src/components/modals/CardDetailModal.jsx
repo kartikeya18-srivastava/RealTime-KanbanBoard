@@ -205,21 +205,59 @@ const CardDetailModal = ({ isOpen, onClose, card, onTyping }) => {
                 </div>
 
                 {/* Assignees Section */}
-                {card.assignees?.length > 0 && (
-                  <div className="pt-2">
-                    <h4 className="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-3 ml-1">Collaborators</h4>
-                    <div className="flex flex-wrap gap-3">
-                      {card.assignees.map(as => (
-                        <div key={as._id} className="flex items-center space-x-2.5 bg-white/5 p-1.5 pr-4 rounded-xl border border-white/5 group hover:border-blue-500/20 transition-all">
-                          <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-[10px] font-bold text-white uppercase">
-                            {as.displayName[0]}
-                          </div>
-                          <span className="text-xs font-semibold text-text-muted group-hover:text-text-main transition-colors">{as.displayName}</span>
-                        </div>
-                      ))}
-                    </div>
+                <div className="pt-2">
+                  <div className="flex items-center justify-between mb-3 ml-1">
+                    <h4 className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Collaborators</h4>
+                    {isEditing && (
+                      <div className="relative group/select">
+                        <select 
+                          className="bg-white/5 border border-white/10 rounded-lg py-1 px-3 text-[10px] text-text-muted hover:text-text-main hover:bg-white/10 outline-none cursor-pointer transition-all"
+                          onChange={async (e) => {
+                            const userId = e.target.value;
+                            if (!userId) return;
+                            const user = activeBoard.workspaceId.members.find(m => m.userId._id === userId)?.userId;
+                            if (user && !labels.some(a => a._id === userId)) {
+                               const newAssignees = [...(card.assignees || []), user];
+                               await api.patch(`/cards/${card._id}`, { assignees: newAssignees.map(a => a._id) });
+                               toast.success('Assignee added');
+                            }
+                          }}
+                          value=""
+                        >
+                          <option value="">Add member...</option>
+                          {activeBoard?.workspaceId?.members?.map(m => (
+                            <option key={m.userId._id} value={m.userId._id}>{m.userId.displayName}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
                   </div>
-                )}
+                  <div className="flex flex-wrap gap-3">
+                    {card.assignees?.map(as => (
+                      <div key={as._id} className="flex items-center space-x-2.5 bg-white/5 p-1.5 pr-4 rounded-xl border border-white/5 group hover:border-blue-500/20 transition-all relative">
+                        <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-[10px] font-bold text-white uppercase">
+                          {as.displayName[0]}
+                        </div>
+                        <span className="text-xs font-semibold text-text-muted group-hover:text-text-main transition-colors">{as.displayName}</span>
+                        {isEditing && (
+                          <button 
+                             onClick={async () => {
+                               const newAssignees = card.assignees.filter(a => a._id !== as._id);
+                               await api.patch(`/cards/${card._id}`, { assignees: newAssignees.map(a => a._id) });
+                               toast.success('Assignee removed');
+                             }}
+                             className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100"
+                          >
+                            <X size={10} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    {(!card.assignees || card.assignees.length === 0) && (
+                       <p className="text-[10px] text-text-muted/30 italic ml-1">No one assigned yet...</p>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
           </motion.div>

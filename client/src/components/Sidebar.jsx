@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Plus, Settings, ChevronRight, Hash, LogOut, Kanban, Trash2, Sun, Moon } from 'lucide-react';
+import { Layout, Plus, Settings, ChevronRight, Hash, LogOut, Kanban, Trash2, Sun, Moon, UserPlus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -12,7 +12,8 @@ const Sidebar = ({
   setActiveBoard,
   onAddBoard,
   onAddWorkspace,
-  onDeleteWorkspace
+  onDeleteWorkspace,
+  onInvite
 }) => {
   const { logout, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -44,13 +45,24 @@ const Sidebar = ({
                   <div className={`h-2.5 w-2.5 rounded-full mr-3 ${activeWorkspace?._id === ws._id ? 'bg-blue-500' : 'bg-slate-600'}`} />
                   <span className="truncate">{ws.name}</span>
                 </button>
-                <button 
-                  onClick={(e) => { e.stopPropagation(); onDeleteWorkspace(ws._id); }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity rounded-md hover:bg-red-500/10"
-                  title="Delete Workspace"
-                >
-                  <Trash2 size={12} />
-                </button>
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {ws.members.find(m => m.userId === user?._id)?.role === 'owner' && (
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); onInvite(ws); }}
+                      className="p-1.5 text-slate-500 hover:text-blue-500 rounded-md hover:bg-blue-500/10"
+                      title="Invite Member"
+                    >
+                      <UserPlus size={12} />
+                    </button>
+                  )}
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onDeleteWorkspace(ws._id); }}
+                    className="p-1.5 text-slate-500 hover:text-red-500 rounded-md hover:bg-red-500/10"
+                    title="Delete Workspace"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>

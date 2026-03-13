@@ -28,6 +28,7 @@ export const inviteMember = async (req, res, next) => {
     const { email, role } = req.body;
     const { workspace } = await workspaceService.inviteMember(
       req.params.id,
+      req.user._id,
       email,
       role
     );

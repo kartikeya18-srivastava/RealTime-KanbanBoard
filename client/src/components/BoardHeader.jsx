@@ -1,7 +1,7 @@
 import React from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Search, Bell } from 'lucide-react';
 
-const BoardHeader = ({ activeBoard, activeWorkspace, presence, onDeleteBoard }) => {
+const BoardHeader = ({ activeBoard, activeWorkspace, presence, onDeleteBoard, onToggleActivity, searchQuery, setSearchQuery }) => {
   return (
     <header className="h-16 border-b border-border-subtle flex items-center justify-between px-8 bg-background/50 backdrop-blur-sm">
       <div className="flex items-center space-x-4">
@@ -26,7 +26,28 @@ const BoardHeader = ({ activeBoard, activeWorkspace, presence, onDeleteBoard }) 
         )}
       </div>
 
-      <div className="flex items-center -space-x-2 overflow-hidden">
+      <div className="hidden md:flex flex-1 max-w-md mx-8">
+        <div className="relative w-full group">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 h-4 w-4 group-focus-within:text-blue-500 transition-colors" />
+          <input 
+            type="text"
+            placeholder="Search cards, labels..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-white/5 border border-white/5 rounded-xl py-2 pl-10 pr-4 text-sm text-text-main focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:bg-white/10 transition-all"
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center space-x-6">
+        <button 
+          onClick={onToggleActivity}
+          className="relative p-2 text-text-muted hover:text-text-main hover:bg-white/5 rounded-xl transition-all active:scale-95"
+          title="Activity Log"
+        >
+          <Bell size={20} />
+          <span className="absolute top-1 right-1 h-2 w-2 bg-blue-500 rounded-full border-2 border-background" />
+        </button>
         {presence.slice(0, 5).map((p, i) => (
           <div 
             key={p.userId} 
