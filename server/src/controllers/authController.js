@@ -50,13 +50,7 @@ export const refreshToken = async (req, res, next) => {
 export const logout = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
-    const user = req.user;
-
-    if (refreshToken) {
-      user.refreshTokens = user.refreshTokens.filter((t) => t !== refreshToken);
-      await User.findByIdAndUpdate(user._id, { refreshTokens: user.refreshTokens });
-    }
-
+    await authService.logout(req.user._id, refreshToken);
     return res.json({ message: "Logged out successfully" });
   } catch (err) {
     next(err);

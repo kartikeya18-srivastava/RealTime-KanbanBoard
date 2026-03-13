@@ -8,14 +8,24 @@ class WorkspaceService {
     }).populate("createdBy", "displayName email avatarColor");
   }
 
-  async createWorkspace({ name, slug, userId }) {
-    if (!name || !slug) {
+  async createWorkspace({ name, slug: requestedSlug, userId }) {
+    if (!name || !requestedSlug) {
       throw { status: 400, code: "VALIDATION_ERROR", message: "Name and slug required" };
     }
 
-    const exists = await Workspace.findOne({ slug });
+    let slug = requestedSlug;
+    let exists = await Workspace.findOne({ slug });
+    
+    // If slug exists, append a short random suffix
     if (exists) {
-      throw { status: 409, code: "CONFLICT", message: "Slug already in use" };
+      const suffix = Math.random().toString(36).substring(2, 6);
+      slug = `${requestedSlug}-${suffix}`;
+      // Final check for the new slug
+      const stillExists = await Workspace.findOne({ slug });
+      if (stillExists) {
+        // If it still exists (very rare), use a longer one
+        slug = `${requestedSlug}-${Date.now().toString(36)}`;
+      }
     }
 
     const workspace = new Workspace({

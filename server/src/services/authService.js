@@ -84,6 +84,14 @@ class AuthService {
 
     return { accessToken, refreshToken };
   }
+
+  async logout(userId, token) {
+    if (!token) return;
+    const user = await User.findById(userId);
+    if (!user) return;
+    user.refreshTokens = user.refreshTokens.filter((t) => t !== token);
+    await user.save();
+  }
 }
 
 export default new AuthService();
