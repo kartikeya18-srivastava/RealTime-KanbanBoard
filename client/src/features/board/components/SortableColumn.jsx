@@ -6,11 +6,11 @@ import SortableCard from './SortableCard';
 import api from '../../../api/client';
 import { toast } from 'react-hot-toast';
 
-export const ColumnContainer = ({ 
-  column, 
-  cards = [], 
-  onAddCard, 
-  onCardClick, 
+export const ColumnContainer = ({
+  column,
+  cards = [],
+  onAddCard,
+  onCardClick,
   onDeleteColumn,
   presence = [],
   isOverlay = false,
@@ -24,9 +24,9 @@ export const ColumnContainer = ({
 
   const handleUpdate = async () => {
     if (!title.trim() || title === column.title) {
-       setIsEditing(false);
-       setTitle(column.title);
-       return;
+      setIsEditing(false);
+      setTitle(column.title);
+      return;
     }
     try {
       await api.patch(`/boards/${column.boardId}/columns/${column._id}`, { title });
@@ -36,19 +36,19 @@ export const ColumnContainer = ({
     }
   };
   return (
-    <div 
+    <div
       ref={setNodeRef}
       style={style}
       className={`flex h-full w-80 shrink-0 flex-col rounded-2xl bg-surface/40 border border-border-subtle/50 backdrop-blur-sm ${isOverlay ? 'shadow-2xl ring-2 ring-blue-500/20 shadow-blue-500/10' : ''}`}
     >
-      <div 
+      <div
         {...attributes}
         {...listeners}
         className={`flex items-center justify-between p-4 ${isOverlay ? 'cursor-grabbing' : 'cursor-grab'} active:cursor-grabbing group`}
       >
         <div className="flex items-center space-x-3 flex-1 min-w-0">
           {isEditing ? (
-            <input 
+            <input
               autoFocus
               className="text-sm font-bold text-text-main bg-background border border-blue-500/50 rounded px-2 py-1 outline-none w-full"
               value={title}
@@ -57,7 +57,7 @@ export const ColumnContainer = ({
               onKeyDown={e => e.key === 'Enter' && handleUpdate()}
             />
           ) : (
-            <h2 
+            <h2
               onClick={() => !isOverlay && setIsEditing(true)}
               className="text-sm font-bold text-text-main tracking-wide uppercase truncate cursor-pointer hover:text-blue-500 transition-colors"
             >
@@ -70,7 +70,7 @@ export const ColumnContainer = ({
         </div>
         {!isOverlay && (
           <div className="flex items-center space-x-1 transition-opacity">
-            <button 
+            <button
               onClick={(e) => { e.stopPropagation(); onDeleteColumn(column._id); }}
               className="p-1 text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors"
             >
@@ -86,15 +86,15 @@ export const ColumnContainer = ({
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 pb-4 scrollbar-hide">
         <SortableContext items={cards.map(c => c._id)} strategy={verticalListSortingStrategy}>
           {cards.map(card => (
-            <SortableCard 
-              key={card._id} 
-              card={card} 
+            <SortableCard
+              key={card._id}
+              card={card}
               presence={presence}
-              onClick={() => onCardClick?.(card)} 
+              onClick={() => onCardClick?.(card)}
             />
           ))}
         </SortableContext>
-        
+
         {!isOverlay && (
           <button
             onClick={() => onAddCard(column._id)}
@@ -133,7 +133,7 @@ const SortableColumn = (props) => {
 
   if (isDragging) {
     return (
-      <div 
+      <div
         ref={setNodeRef}
         style={style}
         className="flex h-full w-80 shrink-0 flex-col rounded-2xl border-2 border-dashed border-blue-500/20 bg-blue-500/5 opacity-50"
@@ -142,7 +142,7 @@ const SortableColumn = (props) => {
   }
 
   return (
-    <ColumnContainer 
+    <ColumnContainer
       {...props}
       attributes={attributes}
       listeners={listeners}

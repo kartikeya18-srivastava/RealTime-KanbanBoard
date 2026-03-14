@@ -6,7 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import { Calendar, Tag, User, Eye, Edit3, X, Clock, Trash2, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CardDetailModal = ({ isOpen, onClose, card, onTyping }) => {
+const CardDetailModal = ({ isOpen, onClose, card, onTyping, activeBoard }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');

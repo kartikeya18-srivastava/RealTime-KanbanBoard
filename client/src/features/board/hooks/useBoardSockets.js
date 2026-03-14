@@ -77,6 +77,18 @@ const useBoardSockets = (activeBoardId, setBoardData) => {
       });
     });
 
+    onEvent('column:moved', ({ columnId, newIndex }) => {
+      setBoardData(prev => {
+        if (!prev) return prev;
+        const columns = [...prev.columns];
+        const oldIndex = columns.findIndex(c => c._id === columnId);
+        if (oldIndex === -1) return prev;
+        const [moved] = columns.splice(oldIndex, 1);
+        columns.splice(newIndex, 0, moved);
+        return { ...prev, columns };
+      });
+    });
+
     onEvent('card:rejected', ({ cardId }) => {
       toast.error('Sync conflict! Reverting change.');
       if (activeBoardId) {
@@ -108,11 +120,16 @@ const useBoardSockets = (activeBoardId, setBoardData) => {
     emitEvent('user:typing', { cardId });
   }, [emitEvent]);
 
+  const handleMoveColumn = useCallback(({ columnId, newIndex }) => {
+    emitEvent('column:move', { boardId: activeBoardId, columnId, newIndex });
+  }, [emitEvent, activeBoardId]);
+
   return {
     socket,
     presence,
     handleMoveCard,
-    handleTyping
+    handleTyping,
+    handleMoveColumn
   };
 };
 

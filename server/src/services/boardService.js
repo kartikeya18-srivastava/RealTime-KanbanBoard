@@ -4,7 +4,7 @@ import Card from "../models/Card.js";
 import Workspace from "../models/Workspace.js";
 
 class BoardService {
-  
+
   async listBoards(workspaceId, userId) {
     // Check if workspace exists and user is member
     const workspace = await Workspace.findById(workspaceId);
@@ -53,7 +53,7 @@ class BoardService {
       createdBy: userId,
       columnOrder: [],
     });
-    
+
     await board.save();
     return board;
   }
@@ -134,7 +134,7 @@ class BoardService {
 
     // Delete cards in column
     await Card.deleteMany({ columnId });
-    
+
     // Remove from board's columnOrder
     await Board.findByIdAndUpdate(boardId, {
       $pull: { columnOrder: columnId },

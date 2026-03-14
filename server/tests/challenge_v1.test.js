@@ -151,7 +151,7 @@ describe("Challenge 01 Integration Tests", () => {
             const res = await request(app)
                 .get("/api/workspaces")
                 .set("Authorization", `Bearer ${accessToken}`);
-            
+
             expect(res.status).toBe(200);
             expect(res.body.workspaces.length).toBeGreaterThan(0);
         });

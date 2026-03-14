@@ -36,7 +36,7 @@ export default function boardHandlers(io) {
         if (!user) throw { code: "UNAUTHORIZED", message: "User not found" };
 
         const state = await boardService.getBoardState(boardId, user._id);
-        
+
         currentUser = user;
         currentBoardId = boardId;
         socket.join(`board:${boardId}`);
@@ -60,7 +60,7 @@ export default function boardHandlers(io) {
       if (!currentUser || !currentBoardId) return;
       try {
         const updatedCard = await cardService.moveCard({ ...data, userId: currentUser._id });
-        
+
         io.to(`board:${currentBoardId}`).emit("card:moved", {
           ...data,
           newVersion: updatedCard.version,

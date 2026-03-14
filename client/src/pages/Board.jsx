@@ -27,7 +27,7 @@ const Board = () => {
     deleteWorkspace
   } = useBoardData();
 
-  const { presence, handleMoveCard, socket } = useBoardSockets(activeBoard?._id, setBoardData);
+  const { presence, handleMoveCard, handleMoveColumn, socket } = useBoardSockets(activeBoard?._id, setBoardData);
 
   // Modal Visibility States
   const [modals, setModals] = useState({
@@ -108,7 +108,7 @@ const Board = () => {
 
   return (
     <div className="flex h-screen w-full bg-background text-text-main overflow-hidden">
-      <Sidebar 
+      <Sidebar
         workspaces={workspaces}
         activeWorkspace={activeWorkspace}
         setActiveWorkspace={setActiveWorkspace}
@@ -120,9 +120,9 @@ const Board = () => {
         onDeleteWorkspace={deleteWorkspace}
         onInvite={(ws) => { setActiveWorkspace(ws); toggleModal('invite', true); }}
       />
-      
+
       <main className="flex-1 flex flex-col min-w-0">
-        <BoardHeader 
+        <BoardHeader
           activeBoard={activeBoard}
           activeWorkspace={activeWorkspace}
           presence={presence}
@@ -134,11 +134,11 @@ const Board = () => {
 
         <div className="flex-1 overflow-x-auto p-8">
           {boardData ? (
-            <BoardContent 
+            <BoardContent
               board={boardData.board}
               columns={boardData.columns}
-              cards={boardData.cards.filter(c => 
-                c.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+              cards={boardData.cards.filter(c =>
+                c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 c.labels.some(l => l.toLowerCase().includes(searchQuery.toLowerCase()))
               )}
               presence={presence}
@@ -151,27 +151,27 @@ const Board = () => {
             />
           ) : (
             <div className="flex flex-col h-full items-center justify-center text-text-muted">
-               <div className="h-20 w-20 rounded-full bg-surface flex items-center justify-center mb-4 border border-border-subtle">
-                  <Kanban size={40} className="text-text-muted/50" />
-               </div>
-               <p className="max-w-xs text-center">
-                 {activeWorkspace 
-                   ? 'The selected workspace has no boards, or no board is selected. Select a board from the sidebar.'
-                   : 'Please select a workspace from the sidebar to view your boards.'}
-               </p>
+              <div className="h-20 w-20 rounded-full bg-surface flex items-center justify-center mb-4 border border-border-subtle">
+                <Kanban size={40} className="text-text-muted/50" />
+              </div>
+              <p className="max-w-xs text-center">
+                {activeWorkspace
+                  ? 'The selected workspace has no boards, or no board is selected. Select a board from the sidebar.'
+                  : 'Please select a workspace from the sidebar to view your boards.'}
+              </p>
             </div>
           )}
         </div>
       </main>
 
-      <WorkspaceModal 
+      <WorkspaceModal
         isOpen={modals.workspace}
         onClose={() => toggleModal('workspace', false)}
         setWorkspaces={setWorkspaces}
         setActiveWorkspace={setActiveWorkspace}
       />
 
-      <BoardModal 
+      <BoardModal
         isOpen={modals.board}
         onClose={() => toggleModal('board', false)}
         activeWorkspaceId={activeWorkspace?._id}
@@ -196,15 +196,16 @@ const Board = () => {
         isOpen={modals.detail}
         onClose={() => toggleModal('detail', false)}
         card={activeCardDetail}
+        activeBoard={activeBoard}
       />
 
-      <InviteModal 
+      <InviteModal
         isOpen={modals.invite}
         onClose={() => toggleModal('invite', false)}
         workspaceId={activeWorkspace?._id}
       />
 
-      <ActivityLog 
+      <ActivityLog
         isOpen={modals.activity}
         onClose={() => toggleModal('activity', false)}
         boardId={activeBoard?._id}

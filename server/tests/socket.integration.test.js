@@ -23,7 +23,7 @@ describe("Socket.io Concurrency Tests", () => {
     httpServer = createServer(app);
     io = new Server(httpServer);
     boardHandlers(io);
-    
+
     return new Promise((resolve) => {
       httpServer.listen(() => {
         port = httpServer.address().port;

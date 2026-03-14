@@ -3,9 +3,9 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { AlignLeft, MessageSquare, Clock } from 'lucide-react';
 
-export const CardContainer = ({ 
-  card, 
-  onClick, 
+export const CardContainer = ({
+  card,
+  onClick,
   isOverlay = false,
   attributes,
   listeners,
@@ -54,12 +54,12 @@ export const CardContainer = ({
 
         <div className="flex -space-x-1.5 overflow-hidden">
           {(card.assignees || []).map((as) => (
-            <div 
+            <div
               key={as._id}
               className="h-5 w-5 rounded-full border border-background bg-slate-700 flex items-center justify-center text-[8px] font-bold text-white shadow-sm"
               title={as.displayName}
             >
-                {as.displayName ? as.displayName[0].toUpperCase() : '?'}
+              {as.displayName ? as.displayName[0].toUpperCase() : '?'}
             </div>
           ))}
         </div>
@@ -92,7 +92,7 @@ const SortableCard = (props) => {
 
   if (isDragging) {
     return (
-      <div 
+      <div
         ref={setNodeRef}
         style={style}
         className="h-24 w-full rounded-xl border-2 border-dashed border-blue-500/30 bg-blue-500/5"
@@ -101,7 +101,7 @@ const SortableCard = (props) => {
   }
 
   return (
-    <CardContainer 
+    <CardContainer
       {...props}
       attributes={attributes}
       listeners={listeners}
