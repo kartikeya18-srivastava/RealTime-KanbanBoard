@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api/client';
+import api from '../../../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Clock, User, MessageSquare, ArrowRight, Trash2, Edit3, UserPlus } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';

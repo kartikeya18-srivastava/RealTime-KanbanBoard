@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Modal from '../Modal';
-import api from '../../api/client';
+import Modal from '../../../components/ui/Modal';
+import api from '../../../api/client';
 import { toast } from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
 import { Calendar, Tag, User, Eye, Edit3, X, Clock, Trash2, Save } from 'lucide-react';

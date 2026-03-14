@@ -2,28 +2,40 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
-import { Mail, Lock, User, Loader2, Kanban } from 'lucide-react';
+import { Mail, Lock, User, Loader2, Kanban, AlertCircle } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+
+const registerSchema = z.object({
+  displayName: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    displayName: '',
-    email: '',
-    password: '',
-  });
   const [isLoading, setIsLoading] = useState(false);
-  const { register } = useAuth();
+  const { register: registerAuth } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(registerSchema),
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     setIsLoading(true);
-
     try {
-      await register(formData);
+      // Remove confirmPassword before sending to API
+      const { confirmPassword, ...registerData } = data;
+      await registerAuth(registerData);
       toast.success('Account created successfully!');
       navigate('/');
     } catch (err) {
@@ -48,49 +60,94 @@ const Register = () => {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4 rounded-md shadow-sm">
-            <div className="relative">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <User className="h-5 w-5 text-slate-500" />
+            <div className="space-y-1">
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <User className={`h-5 w-5 ${errors.displayName ? 'text-red-500' : 'text-slate-500'}`} />
+                </div>
+                <input
+                  {...register('displayName')}
+                  type="text"
+                  className={`block w-full rounded-xl border-0 bg-[#0f172a]/50 py-3 pl-10 text-white shadow-sm ring-1 ring-inset ${
+                    errors.displayName ? 'ring-red-500' : 'ring-[#334155]'
+                  } placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6`}
+                  placeholder="Full Name"
+                />
               </div>
-              <input
-                name="displayName"
-                type="text"
-                required
-                value={formData.displayName}
-                onChange={handleChange}
-                className="block w-full rounded-xl border-0 bg-[#0f172a]/50 py-3 pl-10 text-white shadow-sm ring-1 ring-inset ring-[#334155] placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
-                placeholder="Full Name"
-              />
+              {errors.displayName && (
+                <p className="mt-1 flex items-center text-xs text-red-500">
+                  <AlertCircle size={12} className="mr-1" />
+                  {errors.displayName.message}
+                </p>
+              )}
             </div>
-            <div className="relative">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <Mail className="h-5 w-5 text-slate-500" />
+
+            <div className="space-y-1">
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <Mail className={`h-5 w-5 ${errors.email ? 'text-red-500' : 'text-slate-500'}`} />
+                </div>
+                <input
+                  {...register('email')}
+                  type="email"
+                  className={`block w-full rounded-xl border-0 bg-[#0f172a]/50 py-3 pl-10 text-white shadow-sm ring-1 ring-inset ${
+                    errors.email ? 'ring-red-500' : 'ring-[#334155]'
+                  } placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6`}
+                  placeholder="Email address"
+                />
               </div>
-              <input
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="block w-full rounded-xl border-0 bg-[#0f172a]/50 py-3 pl-10 text-white shadow-sm ring-1 ring-inset ring-[#334155] placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
-                placeholder="Email address"
-              />
+              {errors.email && (
+                <p className="mt-1 flex items-center text-xs text-red-500">
+                  <AlertCircle size={12} className="mr-1" />
+                  {errors.email.message}
+                </p>
+              )}
             </div>
-            <div className="relative">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <Lock className="h-5 w-5 text-slate-500" />
+
+            <div className="space-y-1">
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <Lock className={`h-5 w-5 ${errors.password ? 'text-red-500' : 'text-slate-500'}`} />
+                </div>
+                <input
+                  {...register('password')}
+                  type="password"
+                  className={`block w-full rounded-xl border-0 bg-[#0f172a]/50 py-3 pl-10 text-white shadow-sm ring-1 ring-inset ${
+                    errors.password ? 'ring-red-500' : 'ring-[#334155]'
+                  } placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6`}
+                  placeholder="Password"
+                />
               </div>
-              <input
-                name="password"
-                type="password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="block w-full rounded-xl border-0 bg-[#0f172a]/50 py-3 pl-10 text-white shadow-sm ring-1 ring-inset ring-[#334155] placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
-                placeholder="Password"
-              />
+              {errors.password && (
+                <p className="mt-1 flex items-center text-xs text-red-500">
+                  <AlertCircle size={12} className="mr-1" />
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-1">
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <Lock className={`h-5 w-5 ${errors.confirmPassword ? 'text-red-500' : 'text-slate-500'}`} />
+                </div>
+                <input
+                  {...register('confirmPassword')}
+                  type="password"
+                  className={`block w-full rounded-xl border-0 bg-[#0f172a]/50 py-3 pl-10 text-white shadow-sm ring-1 ring-inset ${
+                    errors.confirmPassword ? 'ring-red-500' : 'ring-[#334155]'
+                  } placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6`}
+                  placeholder="Confirm Password"
+                />
+              </div>
+              {errors.confirmPassword && (
+                <p className="mt-1 flex items-center text-xs text-red-500">
+                  <AlertCircle size={12} className="mr-1" />
+                  {errors.confirmPassword.message}
+                </p>
+              )}
             </div>
           </div>
 

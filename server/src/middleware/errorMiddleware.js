@@ -6,7 +6,7 @@ export const errorHandler = (err, req, res, next) => {
   const message = err.message || "Internal server error";
 
   res.status(status).json({
-    status: "error",
+    success: false,
     code,
     message,
     ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
@@ -15,7 +15,7 @@ export const errorHandler = (err, req, res, next) => {
 
 export const notFoundHandler = (req, res, next) => {
   res.status(404).json({
-    status: "error",
+    success: false,
     code: "NOT_FOUND",
     message: `Resource not found: ${req.method} ${req.url}`,
   });

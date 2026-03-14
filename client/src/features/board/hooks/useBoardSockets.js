@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from 'react';
-import useSocket from './useSocket';
+import useSocket from '../../../hooks/useSocket';
 import { toast } from 'react-hot-toast';
-import api from '../api/client';
+import api from '../../../api/client';
 
 const useBoardSockets = (activeBoardId, setBoardData) => {
   const { socket, presence, emitEvent, onEvent, offEvent } = useSocket(activeBoardId);

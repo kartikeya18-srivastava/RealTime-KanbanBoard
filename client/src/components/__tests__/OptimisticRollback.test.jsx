@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
-import BoardContent from '../BoardContent';
-import { ThemeProvider } from '../../context/ThemeContext';
+import BoardContent from '../../features/board/components/BoardContent';
+import { ThemeProvider } from '../../../context/ThemeContext';
 import React from 'react';
 
 // Mock the useBoardDnd hook to control its state
-vi.mock('../../hooks/useBoardDnd', () => ({
+vi.mock('../../../hooks/useBoardDnd', () => ({
   useBoardDnd: (columns, cards, onMoveCard) => {
     // We'll use a local state mock inside the test if needed, 
     // but for this test we want to verify how BoardContent reacts to card property changes

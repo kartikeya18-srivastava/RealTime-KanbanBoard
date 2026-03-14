@@ -1,11 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import BoardContent from '../BoardContent';
-import { ThemeProvider } from '../../context/ThemeContext';
+import BoardContent from '../../features/board/components/BoardContent';
+import { ThemeProvider } from '../../../context/ThemeContext';
 import React from 'react';
 
 // Mock the useBoardDnd hook
-vi.mock('../../hooks/useBoardDnd', () => ({
+vi.mock('../../../hooks/useBoardDnd', () => ({
   useBoardDnd: (columns, cards, onMoveCard) => ({
     localColumns: columns,
     localCards: cards,

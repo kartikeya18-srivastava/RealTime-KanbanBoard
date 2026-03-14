@@ -3,7 +3,7 @@ import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-
 import { CSS } from '@dnd-kit/utilities';
 import { MoreVertical, Plus, Trash2 } from 'lucide-react';
 import SortableCard from './SortableCard';
-import api from '../api/client';
+import api from '../../../api/client';
 import { toast } from 'react-hot-toast';
 
 export const ColumnContainer = ({ 
@@ -69,7 +69,7 @@ export const ColumnContainer = ({
           </span>
         </div>
         {!isOverlay && (
-          <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center space-x-1 transition-opacity">
             <button 
               onClick={(e) => { e.stopPropagation(); onDeleteColumn(column._id); }}
               className="p-1 text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors"
